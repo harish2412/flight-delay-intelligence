@@ -1,0 +1,30 @@
+[project]
+name = "flight-delay-intelligence"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.43.114",
+    "dbt-core>=1.12.6",
+    "dbt-snowflake>=1.12.3",
+    "fastapi>=0.143.3",
+    "langchain-aws>=1.9.0",
+    "langchain-postgres>=0.0.19",
+    "langgraph>=1.2.15",
+    "lightgbm>=4.7.0",
+    "mlflow>=3.17.1",
+    "pandas>=3.0.6",
+    "psycopg[binary]>=3.3.6",
+    "scikit-learn>=1.9.1",
+    "snowflake-connector-python>=4.8.0",
+    "uvicorn>=0.54.0",
+    "xgboost>=3.4.1",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.7.0",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
