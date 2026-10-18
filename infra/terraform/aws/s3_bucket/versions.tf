@@ -1,6 +1,8 @@
 # Modules declare which providers they need, but never configure them.
 # The calling configuration (envs/dev) passes its configured provider in.
 terraform {
+  required_version = ">= 1.10"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
