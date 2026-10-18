@@ -9,7 +9,7 @@
 #>
 param([switch]$Install)
 
-function Refresh-Path {
+function Update-Path {
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
                 [System.Environment]::GetEnvironmentVariable("Path", "User")
 }
@@ -38,7 +38,7 @@ $cliTools = @(
     @{ Name = "tflint";         Cmd = "tflint";     VerArg = "--version"; Winget = "TerraformLinters.tflint" }
 )
 
-function Check-Cli {
+function Test-Cli {
     foreach ($t in $cliTools) {
         $c = Get-Command $t.Cmd -ErrorAction SilentlyContinue
         if ($c) {
@@ -74,7 +74,7 @@ function Get-StoreNames {
     catch { @() }
 }
 
-function Check-Apps {
+function Test-Apps {
     $reg = Get-InstalledNames
     $store = Get-StoreNames
     foreach ($a in $desktopApps) {
@@ -88,7 +88,7 @@ function Check-Apps {
 # ---------------------------------------------------------------------------
 # 3. WSL with Ubuntu
 # ---------------------------------------------------------------------------
-function Check-Wsl {
+function Test-Wsl {
     $ok = $false
     if (Get-Command wsl -ErrorAction SilentlyContinue) {
         $out = (wsl -l -q 2>$null) -replace "`0", ""
@@ -114,7 +114,7 @@ $extensions = @(
     "charliermarsh.ruff"
 )
 
-function Check-Extensions {
+function Test-Extensions {
     if (-not (Get-Command code -ErrorAction SilentlyContinue)) { return @() }
     $have = (code --list-extensions) | ForEach-Object { $_.ToLower() }
     foreach ($e in $extensions) {
@@ -127,10 +127,10 @@ function Check-Extensions {
 # ---------------------------------------------------------------------------
 function Show-Report {
     $all = @()
-    $all += Check-Wsl
-    $all += Check-Cli
-    $all += Check-Apps
-    $all += Check-Extensions
+    $all += Test-Wsl
+    $all += Test-Cli
+    $all += Test-Apps
+    $all += Test-Extensions
     Write-Host ""
     Write-Host "=== Setup report ===" -ForegroundColor Yellow
     foreach ($r in $all) {
@@ -140,7 +140,7 @@ function Show-Report {
     return $all
 }
 
-$report = Show-Report
+$null = Show-Report
 
 if (-not $Install) {
     Write-Host ""
@@ -159,20 +159,20 @@ foreach ($t in $cliTools) {
         Install-WithWinget $t.Winget ""
     }
 }
-Refresh-Path
+Update-Path
 
 # Snowflake CLI through uv
 if (-not (Get-Command snow -ErrorAction SilentlyContinue)) {
     if (Get-Command uv -ErrorAction SilentlyContinue) {
         Write-Host "  Installing Snowflake CLI with uv ..." -ForegroundColor Cyan
         uv tool install snowflake-cli
-        Refresh-Path
+        Update-Path
     } else {
         Write-Host "  Skipping Snowflake CLI: uv not found yet. Restart the terminal and rerun." -ForegroundColor Red
     }
 }
 
-$appStatus = Check-Apps
+$appStatus = Test-Apps
 foreach ($a in $desktopApps) {
     $s = $appStatus | Where-Object { $_.Tool -eq $a.Name }
     if ($s.Status -eq "MISSING" -and $a.Winget) {
@@ -197,4 +197,5 @@ Write-Host "  Tableau Public: download the desktop app from the Tableau Public w
 Write-Host "  Docker Desktop: open it once, accept terms, enable the WSL2 backend in Settings"
 Write-Host ""
 Write-Host "Close and reopen your terminal, then run this script again without -Install to confirm." -ForegroundColor Yellow
+
 
