@@ -35,8 +35,7 @@ $cliTools = @(
     @{ Name = "Databricks CLI"; Cmd = "databricks"; VerArg = "--version"; Winget = "Databricks.DatabricksCLI" },
     @{ Name = "Snowflake CLI";  Cmd = "snow";       VerArg = "--version"; Winget = "" },   # installed with uv
     @{ Name = "GitHub CLI";     Cmd = "gh";         VerArg = "--version"; Winget = "GitHub.cli" },
-    @{ Name = "tflint";         Cmd = "tflint";     VerArg = "--version"; Winget = "TerraformLinters.tflint" },
-    @{ Name = "checkov";        Cmd = "checkov";    VerArg = "--version"; Winget = "" }
+    @{ Name = "tflint";         Cmd = "tflint";     VerArg = "--version"; Winget = "TerraformLinters.tflint" }
 )
 
 function Check-Cli {

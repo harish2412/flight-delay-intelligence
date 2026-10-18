@@ -1,7 +1,7 @@
 [project]
 name = "flight-delay-intelligence"
 version = "0.1.0"
-description = "Add your description here"
+description = "Real-time flight delay prediction platform on AWS, Databricks, and Snowflake"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
