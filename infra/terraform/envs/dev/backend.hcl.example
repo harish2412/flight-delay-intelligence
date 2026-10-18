@@ -1,0 +1,3 @@
+# Copy this file to backend.hcl (which is gitignored) and fill in your bucket name.
+# Then run: terraform init -backend-config=backend.hcl
+bucket = "flight-delay-tfstate-<your-account-id>"
