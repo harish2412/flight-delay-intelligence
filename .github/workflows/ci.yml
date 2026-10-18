@@ -1,0 +1,95 @@
+name: CI
+
+# Runs on every push to main and on every pull request
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least privilege: this workflow only needs to read the repo
+permissions:
+  contents: read
+
+# If you push again while a run is in progress, cancel the old run
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-lint:
+    name: Python lint (Ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Ruff lint
+        run: uvx ruff@0.17.1 check .
+
+      - name: Ruff format check
+        run: uvx ruff@0.17.1 format --check .
+
+  terraform-fmt:
+    name: Terraform format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.5
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive infra/terraform
+
+  terraform-validate:
+    name: Terraform validate (${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - infra/terraform/bootstrap
+          - infra/terraform/aws/s3_bucket
+          - infra/terraform/envs/dev
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.16.5
+
+      # -backend=false: download providers and modules without touching remote state,
+      # so CI needs no AWS credentials for this check
+      - name: Init
+        run: terraform init -backend=false -input=false
+
+      - name: Validate
+        run: terraform validate
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: terraform-linters/setup-tflint@v4
+
+      - name: Run tflint on every Terraform folder
+        run: tflint --recursive --chdir=infra/terraform
+
+  checkov:
+    name: Checkov security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Pinned image version so results don't change unexpectedly between runs
+      - name: Scan Terraform
+        run: |
+          docker run --rm -v "$PWD:/tf" bridgecrew/checkov:3.3.29 \
+            -d /tf/infra/terraform --compact --quiet
