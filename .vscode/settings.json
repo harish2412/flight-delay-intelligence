@@ -1,0 +1,6 @@
+{
+  "terminal.integrated.env.windows": {
+    "AWS_PROFILE": "flight-delay",
+    "AWS_REGION": "us-east-1"
+  }
+}
